@@ -135,6 +135,14 @@ class MappingDatabase:
                 return datetime.fromisoformat(result[0])
             return None
 
+    def get_checksum(self, reminder_uuid: str) -> Optional[str]:
+        """Get stored checksum for a reminder."""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT checksum FROM mappings WHERE reminder_uuid = ?', (reminder_uuid,))
+            result = cursor.fetchone()
+            return result[0] if result else None
+
     def save_sync_stats(self, stats: SyncStats):
         """Save sync statistics to history."""
         with sqlite3.connect(self.db_path) as conn:
@@ -233,14 +241,14 @@ class SyncEngine:
                 self.stats.skipped += 1
 
         elif event_id:
-            # Check if update needed
-            last_modified = self.db.get_last_modified(reminder.uuid)
+            # Check if update needed using checksum
+            stored_checksum = self.db.get_checksum(reminder.uuid)
 
-            if reminder.modification_date and last_modified:
-                if reminder.modification_date <= last_modified:
-                    # No changes needed
-                    self.stats.skipped += 1
-                    return
+            if stored_checksum == current_checksum:
+                # No changes detected, skip update
+                logger.debug(f"No changes for reminder: {reminder.title}")
+                self.stats.skipped += 1
+                return
 
             # Update existing event
             logger.debug(f"Updating reminder: {reminder.title}")
