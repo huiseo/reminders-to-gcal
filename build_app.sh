@@ -59,6 +59,11 @@ if [ ! -f "$RESOURCES_PATH/icon.icns" ]; then
     cp icon.icns "$RESOURCES_PATH/"
 fi
 
+# Copy config.yaml to Resources
+if [ -f "config.yaml" ]; then
+    cp config.yaml "$RESOURCES_PATH/"
+fi
+
 # Create .gitignore in data directory
 cat > "$RESOURCES_PATH/data/.gitignore" <<EOF
 *
@@ -69,6 +74,11 @@ EOF
 echo "🔧 Configuring as menubar-only app..."
 /usr/libexec/PlistBuddy -c "Add :LSUIElement bool true" "$APP_PATH/Contents/Info.plist" 2>/dev/null || \
 /usr/libexec/PlistBuddy -c "Set :LSUIElement true" "$APP_PATH/Contents/Info.plist"
+
+# Add Reminders permission description
+echo "🔐 Adding Reminders permission..."
+/usr/libexec/PlistBuddy -c "Add :NSRemindersUsageDescription string 'This app needs access to Reminders to sync them to Google Calendar'" "$APP_PATH/Contents/Info.plist" 2>/dev/null || \
+/usr/libexec/PlistBuddy -c "Set :NSRemindersUsageDescription 'This app needs access to Reminders to sync them to Google Calendar'" "$APP_PATH/Contents/Info.plist"
 
 echo ""
 echo "========================================"

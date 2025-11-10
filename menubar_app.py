@@ -15,8 +15,18 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 # Add src directory to path
-APP_DIR = Path(__file__).parent
-sys.path.insert(0, str(APP_DIR / 'src'))
+# When running as PyInstaller bundle, use _MEIPASS for code, Resources for data
+if getattr(sys, 'frozen', False):
+    # Running as PyInstaller bundle
+    BUNDLE_DIR = Path(sys._MEIPASS)
+    # Use Resources directory for persistent data (outside the executable)
+    APP_DIR = Path(sys.executable).parent.parent / 'Resources'
+else:
+    # Running as script
+    BUNDLE_DIR = Path(__file__).parent
+    APP_DIR = BUNDLE_DIR
+
+sys.path.insert(0, str(BUNDLE_DIR / 'src'))
 
 from auth import get_authenticated_service
 from reminders_reader import RemindersReader
@@ -32,9 +42,11 @@ class RemindersToGCalApp(rumps.App):
     """Menu bar app for syncing reminders to Google Calendar."""
 
     def __init__(self):
+        # Use icon from bundle directory
+        icon_path = str(BUNDLE_DIR / "icon.icns") if (BUNDLE_DIR / "icon.icns").exists() else None
         super(RemindersToGCalApp, self).__init__(
             "R→GCal",
-            icon="icon.icns",
+            icon=icon_path,
             quit_button=None
         )
 
