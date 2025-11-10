@@ -248,50 +248,73 @@ class RemindersToGCalApp(rumps.App):
             self.sync_now(None)
 
     def show_preferences(self, _):
-        """Show preferences window."""
-        # Create preferences window using AppleScript
+        """Show preferences window using AppleScript."""
         prefs = self.preferences
-
-        # Auto sync interval options
-        interval_options = {
-            '15 minutes': 15,
-            '30 minutes': 30,
-            '1 hour': 60,
-            '2 hours': 120,
-            'Manual only': 0
-        }
-
         current_interval = prefs.get('auto_sync_interval', 60)
-        interval_text = next((k for k, v in interval_options.items() if v == current_interval), '1 hour')
+        show_notifications = prefs.get('show_notifications', True)
 
-        # Show dialog with current settings
-        response = rumps.Window(
-            title='Preferences',
-            message='Auto-sync interval:',
-            default_text=str(current_interval),
-            ok='Save',
-            cancel='Cancel',
-            dimensions=(320, 100)
-        ).run()
+        # Create AppleScript dialog with list selection
+        current_text = self._get_interval_text(current_interval)
+        script = f'''
+        tell application "System Events"
+            set intervalChoice to choose from list {{"Manual only (disabled)", "15 minutes", "30 minutes", "1 hour", "2 hours"}} ¬
+                with prompt "Select auto-sync interval:" ¬
+                default items {{"{current_text}"}} ¬
+                with title "Preferences" ¬
+                OK button name "Save" cancel button name "Cancel"
 
-        if response.clicked:
-            try:
-                new_interval = int(response.text)
-                if new_interval < 0:
-                    new_interval = 0
+            if intervalChoice is not false then
+                return item 1 of intervalChoice
+            else
+                return "cancelled"
+            end if
+        end tell
+        '''
 
+        try:
+            import subprocess
+            result = subprocess.run(['osascript', '-e', script], capture_output=True, text=True, timeout=60)
+
+            if result.returncode == 0 and result.stdout.strip() != "cancelled":
+                choice = result.stdout.strip()
+
+                # Map choice to interval
+                interval_map = {
+                    'Manual only (disabled)': 0,
+                    '15 minutes': 15,
+                    '30 minutes': 30,
+                    '1 hour': 60,
+                    '2 hours': 120
+                }
+
+                new_interval = interval_map.get(choice, 60)
+
+                # Save preferences
                 self.preferences['auto_sync_interval'] = new_interval
                 self.preferences['auto_sync_enabled'] = new_interval > 0
                 self.save_preferences()
                 self.start_auto_sync()
 
-                rumps.notification(
-                    title="Preferences Saved",
-                    subtitle="Settings updated",
-                    message=f"Auto-sync: {'Enabled' if new_interval > 0 else 'Disabled'}"
-                )
-            except ValueError:
-                rumps.alert("Invalid Input", "Please enter a valid number of minutes.")
+                # Show success notification (disabled as requested)
+                # rumps.notification(
+                #     title="Settings Saved",
+                #     subtitle="Preferences updated",
+                #     message=f"Auto-sync: {choice}"
+                # )
+        except Exception as e:
+            logger.error(f"Error showing preferences: {e}")
+            rumps.alert("Error", f"Could not open preferences: {str(e)}")
+
+    def _get_interval_text(self, interval: int) -> str:
+        """Convert interval minutes to display text."""
+        interval_map = {
+            0: 'Manual only (disabled)',
+            15: '15 minutes',
+            30: '30 minutes',
+            60: '1 hour',
+            120: '2 hours'
+        }
+        return interval_map.get(interval, '1 hour')
 
     def toggle_launch_at_login(self):
         """Toggle launch at login setting."""
