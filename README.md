@@ -1,235 +1,237 @@
 # Reminders to Google Calendar
 
-Mac/iPhone Reminders를 Google Calendar와 자동으로 동기화하는 macOS 메뉴바 앱입니다.
+A macOS menubar app that automatically syncs Mac/iPhone Reminders to Google Calendar.
 
 ![Version](https://img.shields.io/badge/version-0.0.0-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-macOS-lightgrey.svg)
 ![Python](https://img.shields.io/badge/python-3.9+-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
-## 주요 기능
+[한국어 문서](README.ko.md)
 
-- ✅ **양방향 동기화**: Mac/iPhone Reminders → Google Calendar
-- ✅ **자동 동기화**: 설정 가능한 간격으로 자동 실행 (15분, 30분, 1시간, 2시간)
-- ✅ **메뉴바 통합**: 가볍고 편리한 메뉴바 앱
-- ✅ **우선순위 색상**: Reminders 우선순위를 Google Calendar 색상으로 매핑
-- ✅ **위치 정보**: Reminders의 위치 정보도 동기화
-- ✅ **완료 처리**: 완료된 항목 자동 삭제 또는 유지
-- ✅ **중복 방지**: UUID 기반 매핑으로 중복 생성 방지
-- ✅ **에러 복구**: 동기화 실패 시 재시도 및 재인증 옵션
+## Features
 
-## 스크린샷
+- ✅ **One-way Sync**: Mac/iPhone Reminders → Google Calendar
+- ✅ **Auto Sync**: Configurable intervals (15min, 30min, 1hr, 2hr)
+- ✅ **Menubar Integration**: Lightweight and convenient menubar app
+- ✅ **Priority Colors**: Maps Reminders priority to Google Calendar colors
+- ✅ **Location Support**: Syncs location information from Reminders
+- ✅ **Completed Items**: Auto-delete or keep completed items
+- ✅ **Duplicate Prevention**: UUID-based mapping prevents duplicate events
+- ✅ **Error Recovery**: Retry and re-authentication options on sync failure
 
-(추후 추가)
+## Screenshots
 
-## 시스템 요구사항
+(Coming soon)
 
-- macOS 10.15 (Catalina) 이상
-- Python 3.9 이상 (개발용)
+## System Requirements
+
+- macOS 10.15 (Catalina) or later
+- Python 3.9+ (for development)
 - Google Account
-- Apple ID (iCloud 동기화용)
+- Apple ID (for iCloud sync)
 
-## 설치 방법
+## Installation
 
-### 방법 1: DMG 설치 (권장)
+### Method 1: DMG Installation (Recommended)
 
-1. [Releases](https://github.com/heeseo/reminders-to-gcal/releases)에서 최신 DMG 다운로드
-2. DMG 파일을 열고 `Reminders to GCal.app`을 `Applications` 폴더로 드래그
-3. 앱 실행
+1. Download the latest DMG from [Releases](https://github.com/huiseo/reminders-to-gcal/releases)
+2. Open the DMG file and drag `Reminders to GCal.app` to the `Applications` folder
+3. Launch the app
 
-### 방법 2: 소스에서 빌드
+### Method 2: Build from Source
 
 ```bash
-# 저장소 클론
-git clone https://github.com/heeseo/reminders-to-gcal.git
+# Clone repository
+git clone https://github.com/huiseo/reminders-to-gcal.git
 cd reminders-to-gcal
 
-# 의존성 설치
+# Install dependencies
 pip3 install -r requirements.txt
 
-# 앱 빌드
+# Build app
 ./build_app.sh
 
-# 설치
+# Install
 cp -r "dist/Reminders to GCal.app" /Applications/
 ```
 
-## 초기 설정
+## Initial Setup
 
-### 1. Google OAuth 인증 설정
+### 1. Google OAuth Credentials
 
-1. [Google Cloud Console](https://console.cloud.google.com/) 접속
-2. 새 프로젝트 생성 또는 기존 프로젝트 선택
-3. Google Calendar API 활성화
-4. OAuth 2.0 클라이언트 ID 생성 (Desktop app)
-5. `credentials.json` 다운로드
-6. 파일을 앱의 Resources 폴더에 복사:
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable Google Calendar API
+4. Create OAuth 2.0 Client ID (Desktop app)
+5. Download `credentials.json`
+6. Copy the file to the app's Resources folder:
    ```bash
    cp credentials.json "/Applications/Reminders to GCal.app/Contents/Resources/"
    ```
 
-### 2. 첫 실행
+### 2. First Launch
 
-1. Finder에서 `Reminders to GCal.app` 더블클릭
-2. Reminders 접근 권한 승인
-3. 브라우저에서 Google OAuth 인증 완료
-4. 메뉴바에서 R→GCal 아이콘 확인
+1. Double-click `Reminders to GCal.app` in Finder
+2. Approve Reminders access permission
+3. Complete Google OAuth authentication in browser
+4. Check for the R→GCal icon in the menubar
 
-## 사용 방법
+## Usage
 
-### 메뉴바 메뉴
+### Menubar Menu
 
-- **Sync Now**: 즉시 동기화 실행
-- **Last Sync**: 마지막 동기화 정보 표시
-- **Preferences**: 자동 동기화 간격 설정
-- **View Logs**: 동기화 로그 확인
-- **Open Reminders**: Reminders 앱 열기
-- **Open Google Calendar**: Google Calendar 웹 열기
-- **Help**: 도움말 및 GitHub 이슈 페이지
-- **About**: 앱 정보
-- **Quit**: 앱 종료
+- **Sync Now**: Run sync immediately
+- **Last Sync**: Show last sync information
+- **Preferences**: Configure auto-sync interval
+- **View Logs**: View sync logs
+- **Open Reminders**: Open Reminders app
+- **Open Google Calendar**: Open Google Calendar web
+- **Help**: Help and GitHub issues page
+- **About**: App information
+- **Quit**: Quit app
 
-### 설정 변경
+### Configuration
 
-`config.yaml` 파일을 수정하여 다양한 설정을 변경할 수 있습니다:
+Edit `config.yaml` to customize settings:
 
 ```yaml
 reminders:
-  sync_lists: []  # 특정 목록만 동기화 (비워두면 전체)
-  skip_completed_older_than_days: 30  # 오래된 완료 항목 제외
+  sync_lists: []  # Sync specific lists (empty = all)
+  skip_completed_older_than_days: 30  # Skip old completed items
 
 sync:
-  completed_action: delete  # 완료 시 동작: delete 또는 keep
+  completed_action: delete  # Action for completed: delete or keep
 
 google_calendar:
-  calendar_id: primary  # 대상 캘린더 ID
+  calendar_id: primary  # Target calendar ID
   priority_colors:
-    high: "11"    # 빨강
-    medium: "5"   # 노랑
-    low: "7"      # 파랑
+    high: "11"    # Red
+    medium: "5"   # Yellow
+    low: "7"      # Blue
 ```
 
-## 아키텍처
+## Architecture
 
 ```
 reminders-to-gcal/
 ├── src/
-│   ├── auth.py              # Google OAuth 인증
-│   ├── reminders_reader.py  # Mac Reminders 읽기 (EventKit)
-│   ├── gcal_writer.py       # Google Calendar 쓰기
-│   └── sync_engine.py       # 동기화 로직 및 DB
-├── tests/                   # 테스트 코드 (56개)
-├── menubar_app.py          # 메뉴바 앱 (rumps)
-├── config.yaml             # 설정 파일
-├── build_app.sh            # 빌드 스크립트
-└── Uninstall.command       # 제거 스크립트
+│   ├── auth.py              # Google OAuth authentication
+│   ├── reminders_reader.py  # Mac Reminders reader (EventKit)
+│   ├── gcal_writer.py       # Google Calendar writer
+│   └── sync_engine.py       # Sync logic and DB
+├── tests/                   # Test code (56 tests)
+├── menubar_app.py          # Menubar app (rumps)
+├── config.yaml             # Configuration file
+├── build_app.sh            # Build script
+└── Uninstall.command       # Uninstall script
 ```
 
-## 개발
+## Development
 
-### 개발 환경 설정
+### Development Setup
 
 ```bash
-# 의존성 설치
+# Install dependencies
 pip3 install -r requirements.txt
 
-# 테스트 실행
+# Run tests
 python3 -m unittest discover -s tests -v
 
-# 앱 실행 (개발 모드)
+# Run app (development mode)
 python3 menubar_app.py
 ```
 
-### 테스트
+### Testing
 
-- **총 56개 테스트**
-- **94.6% 통과율** (53/56 통과)
-- 단위 테스트, 통합 테스트, 품질 테스트 포함
+- **Total: 56 tests**
+- **Pass rate: 94.6%** (53/56 passed)
+- Includes unit tests, integration tests, and quality tests
 
 ```bash
-# 전체 테스트 실행
+# Run all tests
 python3 -m unittest discover -s tests
 
-# 특정 테스트 실행
+# Run specific tests
 python3 -m unittest tests.test_sync_engine
 python3 -m unittest tests.test_quality
 ```
 
-### 빌드
+### Build
 
 ```bash
-# 앱 빌드
+# Build app
 ./build_app.sh
 
-# DMG 생성
+# Create DMG
 hdiutil create -volname "Reminders to GCal" \
   -srcfolder /tmp/dmg_build \
   -ov -format UDZO \
   "Reminders-to-GCal-Installer.dmg"
 ```
 
-## 데이터 및 프라이버시
+## Data & Privacy
 
-### 저장되는 데이터
+### Stored Data
 
-- **로컬 데이터베이스** (`mapping.db`): UUID 매핑만 저장
-- **OAuth 토큰** (`token.json`): 권한 0o600으로 보호
-- **설정 파일**: 사용자 환경설정
+- **Local Database** (`mapping.db`): Stores UUID mappings only
+- **OAuth Token** (`token.json`): Protected with 0o600 permissions
+- **Config File**: User preferences
 
-### 데이터 전송
+### Data Transfer
 
-- Google Calendar API를 통해서만 데이터 전송
-- 모든 통신은 HTTPS로 암호화
-- 제3자 서버로 데이터 전송 없음
+- Data transfer only through Google Calendar API
+- All communication encrypted via HTTPS
+- No data transfer to third-party servers
 
-## 문제 해결
+## Troubleshooting
 
-### 앱이 실행되지 않을 때
+### App Won't Launch
 
 ```bash
-# 로그 확인
+# Check logs
 tail -f "/Applications/Reminders to GCal.app/Contents/Resources/logs/menubar_app.log"
 
-# 권한 확인
+# Check permissions
 ls -la "/Applications/Reminders to GCal.app/Contents/Resources/credentials.json"
 
-# 잠금 파일 제거
+# Remove lock file
 rm ~/.reminders-to-gcal.lock
 ```
 
-### 동기화가 안 될 때
+### Sync Not Working
 
-1. **Preferences**에서 자동 동기화 간격 확인
-2. **View Logs**에서 에러 메시지 확인
-3. Google OAuth 토큰 재설정:
+1. Check auto-sync interval in **Preferences**
+2. Check error messages in **View Logs**
+3. Reset Google OAuth token:
    ```bash
    rm "/Applications/Reminders to GCal.app/Contents/Resources/data/token.json"
    ```
-4. 앱 재시작 후 재인증
+4. Restart app and re-authenticate
 
-## 제거
+## Uninstallation
 
-### DMG의 Uninstall.command 사용
+### Using Uninstall.command from DMG
 
-1. DMG를 다시 마운트
-2. `Uninstall.command` 더블클릭
-3. 관리자 비밀번호 입력
+1. Re-mount the DMG
+2. Double-click `Uninstall.command`
+3. Enter administrator password
 
-### 수동 제거
+### Manual Uninstallation
 
 ```bash
-# 앱 종료
+# Quit app
 pkill -f "Reminders to GCal"
 
-# 모든 파일 제거
+# Remove all files
 rm -rf "/Applications/Reminders to GCal.app"
 rm ~/.reminders-to-gcal-prefs.json
 rm ~/.reminders-to-gcal.lock
 ```
 
-## 기여
+## Contributing
 
-Pull Request를 환영합니다!
+Pull requests are welcome!
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
@@ -237,28 +239,28 @@ Pull Request를 환영합니다!
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 라이선스
+## License
 
-MIT License - 자세한 내용은 [LICENSE](LICENSE) 파일 참조
+MIT License - see [LICENSE](LICENSE) file for details
 
-## 로드맵
+## Roadmap
 
-- [ ] v1.0.0 - 첫 정식 릴리스
-- [ ] 로그인 시 자동 실행 UI
-- [ ] 다국어 지원 (한국어/영어)
-- [ ] 양방향 동기화 (Google Calendar → Reminders)
-- [ ] 선택적 목록 동기화 UI
-- [ ] 성능 최적화 (대용량 데이터)
+- [ ] v1.0.0 - First stable release
+- [ ] Auto-launch on login UI
+- [ ] Multi-language support (Korean/English)
+- [ ] Bi-directional sync (Google Calendar → Reminders)
+- [ ] Selective list sync UI
+- [ ] Performance optimization (large datasets)
 
-## 참고 자료
+## Resources
 
 - [Google Calendar API Documentation](https://developers.google.com/calendar)
 - [PyObjC - EventKit](https://pyobjc.readthedocs.io/)
 - [rumps - macOS menubar apps](https://github.com/jaredks/rumps)
 
-## 문의
+## Contact
 
-- **Issues**: [GitHub Issues](https://github.com/heeseo/reminders-to-gcal/issues)
+- **Issues**: [GitHub Issues](https://github.com/huiseo/reminders-to-gcal/issues)
 - **Email**: hui.seo@gmail.com
 
 ---
