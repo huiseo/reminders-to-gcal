@@ -4,6 +4,7 @@ Sync engine for coordinating reminders to Google Calendar sync.
 
 import logging
 import sqlite3
+import hashlib
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Set
@@ -189,10 +190,10 @@ class SyncEngine:
         self.stats = SyncStats()
 
     def _generate_checksum(self, reminder) -> str:
-        """Generate a checksum for a reminder to detect changes."""
-        # Simple checksum based on key fields (including location)
+        """Generate a deterministic checksum for a reminder to detect changes."""
+        # Use MD5 for deterministic hashing (Python's hash() is randomized per process)
         data = f"{reminder.title}|{reminder.notes}|{reminder.due_date}|{reminder.priority}|{reminder.completed}|{reminder.location}"
-        return str(hash(data))
+        return hashlib.md5(data.encode('utf-8')).hexdigest()
 
     def _should_skip_reminder(self, reminder) -> bool:
         """Determine if a reminder should be skipped."""

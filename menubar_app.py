@@ -62,11 +62,27 @@ class RemindersToGCalApp(rumps.App):
 
         # Setup menu
         self.last_sync_item = rumps.MenuItem('Last Sync: Never', callback=None)
+
+        # Auto-sync interval submenu
+        self.sync_interval_menu = {
+            'manual': rumps.MenuItem('Manual only (disabled)', callback=lambda _: self.set_sync_interval(0)),
+            '15min': rumps.MenuItem('15 minutes', callback=lambda _: self.set_sync_interval(15)),
+            '30min': rumps.MenuItem('30 minutes', callback=lambda _: self.set_sync_interval(30)),
+            '1hour': rumps.MenuItem('1 hour', callback=lambda _: self.set_sync_interval(60)),
+            '2hours': rumps.MenuItem('2 hours', callback=lambda _: self.set_sync_interval(120)),
+        }
+
+        # Update checkmarks for current setting
+        self.update_sync_interval_checkmarks()
+
         self.menu = [
             rumps.MenuItem('Sync Now', callback=self.sync_now),
             self.last_sync_item,
             rumps.separator,
-            rumps.MenuItem('Preferences...', callback=self.show_preferences),
+            [
+                'Auto-Sync Interval',
+                list(self.sync_interval_menu.values())
+            ],
             rumps.separator,
             rumps.MenuItem('View Logs', callback=self.view_logs),
             rumps.MenuItem('Open Reminders', callback=self.open_reminders),
@@ -247,63 +263,35 @@ class RemindersToGCalApp(rumps.App):
         if not self.syncing:
             self.sync_now(None)
 
-    def show_preferences(self, _):
-        """Show preferences window using AppleScript."""
-        prefs = self.preferences
-        current_interval = prefs.get('auto_sync_interval', 60)
-        show_notifications = prefs.get('show_notifications', True)
+    def set_sync_interval(self, interval: int):
+        """Set auto-sync interval and update UI."""
+        self.preferences['auto_sync_interval'] = interval
+        self.preferences['auto_sync_enabled'] = interval > 0
+        self.save_preferences()
+        self.start_auto_sync()
+        self.update_sync_interval_checkmarks()
+        logger.info(f"Auto-sync interval changed to: {self._get_interval_text(interval)}")
 
-        # Create AppleScript dialog with list selection
-        current_text = self._get_interval_text(current_interval)
-        script = f'''
-        tell application "System Events"
-            set intervalChoice to choose from list {{"Manual only (disabled)", "15 minutes", "30 minutes", "1 hour", "2 hours"}} ¬
-                with prompt "Select auto-sync interval:" ¬
-                default items {{"{current_text}"}} ¬
-                with title "Preferences" ¬
-                OK button name "Save" cancel button name "Cancel"
+    def update_sync_interval_checkmarks(self):
+        """Update checkmarks on sync interval menu items."""
+        current_interval = self.preferences.get('auto_sync_interval', 60)
 
-            if intervalChoice is not false then
-                return item 1 of intervalChoice
-            else
-                return "cancelled"
-            end if
-        end tell
-        '''
+        # Clear all checkmarks
+        for item in self.sync_interval_menu.values():
+            item.state = False
 
-        try:
-            import subprocess
-            result = subprocess.run(['osascript', '-e', script], capture_output=True, text=True, timeout=60)
+        # Set checkmark on current interval
+        interval_to_key = {
+            0: 'manual',
+            15: '15min',
+            30: '30min',
+            60: '1hour',
+            120: '2hours'
+        }
 
-            if result.returncode == 0 and result.stdout.strip() != "cancelled":
-                choice = result.stdout.strip()
-
-                # Map choice to interval
-                interval_map = {
-                    'Manual only (disabled)': 0,
-                    '15 minutes': 15,
-                    '30 minutes': 30,
-                    '1 hour': 60,
-                    '2 hours': 120
-                }
-
-                new_interval = interval_map.get(choice, 60)
-
-                # Save preferences
-                self.preferences['auto_sync_interval'] = new_interval
-                self.preferences['auto_sync_enabled'] = new_interval > 0
-                self.save_preferences()
-                self.start_auto_sync()
-
-                # Show success notification (disabled as requested)
-                # rumps.notification(
-                #     title="Settings Saved",
-                #     subtitle="Preferences updated",
-                #     message=f"Auto-sync: {choice}"
-                # )
-        except Exception as e:
-            logger.error(f"Error showing preferences: {e}")
-            rumps.alert("Error", f"Could not open preferences: {str(e)}")
+        key = interval_to_key.get(current_interval, '1hour')
+        if key in self.sync_interval_menu:
+            self.sync_interval_menu[key].state = True
 
     def _get_interval_text(self, interval: int) -> str:
         """Convert interval minutes to display text."""
