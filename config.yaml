@@ -1,0 +1,58 @@
+# Reminders to Google Calendar Sync Configuration
+
+# Google Calendar settings
+google_calendar:
+  # The calendar ID to sync to (use 'primary' for your main calendar)
+  calendar_id: "primary"
+
+  # Color mapping for priority levels (1-9, see https://developers.google.com/calendar/api/v3/reference/colors)
+  priority_colors:
+    high: "11"      # Red
+    medium: "5"     # Yellow
+    low: "7"        # Blue
+    none: "1"       # Default (Lavender)
+
+# Apple Reminders settings
+reminders:
+  # List of reminder lists to sync (empty = sync all lists)
+  # Example: ["Work", "Personal", "Shopping"]
+  sync_lists: []
+
+  # Skip completed reminders older than X days (0 = sync all completed)
+  skip_completed_older_than_days: 30
+
+# Sync behavior
+sync:
+  # How to handle completed reminders in Google Calendar
+  # Options: "delete", "cancel", "keep"
+  completed_action: "delete"
+
+  # Enable dry run mode (no actual changes to Google Calendar)
+  dry_run: false
+
+  # Batch size for API requests
+  batch_size: 50
+
+# Logging
+logging:
+  # Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: "INFO"
+
+  # Log file path (relative to project root)
+  file: "logs/sync.log"
+
+  # Keep log files for X days
+  retention_days: 30
+
+# Database
+database:
+  # Path to mapping database
+  path: "data/mapping.db"
+
+# Authentication
+auth:
+  # Path to Google OAuth credentials file
+  credentials_file: "credentials.json"
+
+  # Path to store OAuth token
+  token_file: "data/token.json"
